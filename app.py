@@ -26,7 +26,15 @@ class Movie(db.Model):
     title = db.Column(db.String(60))
     year = db.Column(db.String(4))
 
+@app.context_processor
+def inject_user():  # 函数名可以随意修改
+    user = User.query.first()
+    return dict(user=user)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    user = User.query.first()
+    return render_template("404.html"), 404
 
 @app.cli.command() # 注册为命令
 @click.option('--drop', is_flag=True, help='Create after drop.')
@@ -37,7 +45,7 @@ def initdb(drop):
     db.create_all(
     click.echo('Initialized database.')
     )
-    
+
 @app.cli.command()
 def forge():
     """Generate fake data."""
@@ -69,7 +77,7 @@ def forge():
 def index():
     user = User.query.first()
     movies = Movie.query.all()
-    return render_template('index.html', user=user, movies=movies)
+    return render_template('index.html',  movies=movies)
 
 @app.route('/user/<name>')
 def user_page(name):
